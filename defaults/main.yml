@@ -1,30 +1,35 @@
 ---
 # defaults file for iptables
 
-iptables_filter_input_policy: drop
-iptables_filter_forward_policy: drop
-iptables_filter_output_policy: accept
+iptables_pkg_install: yes
+iptables_pkg_state: present
 
-iptables_filter_rules:
-  - chain: input
+
+# Default values for rules
+iptables_rules_default_table: filter
+iptables_rules_default_chain: input
+iptables_rules_default_target: accept
+iptables_rules_default_handler: iptables
+
+
+iptables_default_prerouting_policy: accept
+iptables_default_input_policy: drop
+iptables_default_forward_policy: drop
+iptables_default_output_policy: accept
+iptables_default_postrouting_policy: accept
+
+
+iptables_rules:
+  - name: '000 Allow icmp time-exceeded from world'
+    interface: eth0
+    table: filter
+    chain: input
     protocol: tcp
-    source_address: 0.0.0.0/0
-    destination_port: 22
-    comment: OpenSSH
+    source: 0.0.0.0/0
+    dports: 22
+    sports: 22
+    custom: '-m icmp6 --icmpv6-type 3'
     target: accept
+    handler: ip6tables
 
-iptables_nat_prerouting_policy: accept
-iptables_nat_input_policy: accept
-iptables_nat_output_policy: accept
-iptables_nat_postrouting_policy: accept
 
-iptables_nat_rules: []
-
-iptables6_filter_input_policy: drop
-iptables6_filter_forward_policy: drop
-iptables6_filter_output_policy: accept
-
-iptables6_nat_prerouting_policy: accept
-iptables6_nat_input_policy: accept
-iptables6_nat_output_policy: accept
-iptables6_nat_postrouting_policy: accept
