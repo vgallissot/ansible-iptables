@@ -4,6 +4,9 @@
 iptables_pkg_install: yes
 iptables_pkg_state: present
 
+iptables_service_state: started
+iptables_service_enabled: yes
+
 iptables_config_backup: yes
 
 # Default values for rules
@@ -13,11 +16,11 @@ iptables_rules_default_target: accept
 iptables_rules_default_handler: iptables
 
 
-iptables_default_prerouting_policy: accept
-iptables_default_input_policy: drop
-iptables_default_forward_policy: drop
-iptables_default_output_policy: accept
-iptables_default_postrouting_policy: accept
+iptables_policy_default_prerouting: accept
+iptables_policy_default_input: drop
+iptables_policy_default_forward: drop
+iptables_policy_default_output: accept
+iptables_policy_default_postrouting: accept
 
 
 iptables_rules:

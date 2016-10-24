@@ -1,48 +1,22 @@
 ---
 # tasks file for iptables
 
-- name: Include distribution specific variables
-  include_vars: "{{ item }}"
-  with_first_found:
-    - "{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
-    - "{{ ansible_os_family }}.yml"
-
-- name: Create iptables configuration
-  become: yes
-  template:
-    src: iptables.j2
-    dest: "{{ iptables_configuration }}"
-    owner: root
-    group: root
-    mode: 0600
-    backup: "{{ iptables_config_backup }}"
-  register: config_result
-  notify:
-    - restart iptables
+- include: params.yml
   tags:
-    - iptables
+    - 'role::iptables'
+    - 'role::iptables::params'
 
-- name: Create iptables6 configuration
-  become: yes
-  template:
-    src: iptables6.j2
-    dest: "{{ iptables6_configuration }}"
-    owner: root
-    group: root
-    mode: 0600
-    backup: "{{ iptables_config_backup }}"
-  register: config_result
-  notify:
-    - restart iptables
+- include: packages.yml
   tags:
-    - iptables
+    - 'role::iptables'
+    - 'role::iptables::packages'
 
-- name: Ensure iptables is started and enabled on boot
-  become: yes
-  service:
-    name: "{{ iptables_service_name }}"
-    state: started
-    enabled: yes
-  changed_when: False
+- include: services.yml
   tags:
-    - iptables
+    - 'role::iptables'
+    - 'role::iptables::services'
+
+- include: configs.yml
+  tags:
+    - 'role::iptables'
+    - 'role::iptables::configs'

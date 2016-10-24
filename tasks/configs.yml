@@ -1,0 +1,31 @@
+---
+
+- name: IPTables | Create iptables configuration
+  become: yes
+  template:
+    src: iptables.j2
+    dest: "{{ iptables_configuration }}"
+    owner: root
+    group: root
+    mode: 0600
+    backup: "{{ iptables_config_backup }}"
+  register: config_result
+  notify:
+    - restart iptables
+  tags:
+    - iptables
+
+- name: IPTables | Create ip6tables configuration
+  become: yes
+  template:
+    src: iptables6.j2
+    dest: "{{ iptables6_configuration }}"
+    owner: root
+    group: root
+    mode: 0600
+    backup: "{{ iptables_config_backup }}"
+  register: config_result
+  notify:
+    - restart iptables
+  tags:
+    - iptables

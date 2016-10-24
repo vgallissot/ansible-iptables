@@ -1,0 +1,25 @@
+---
+- block:
+
+  - name: IPTables | Install iptables packages (APT)
+    become: yes
+    apt:
+      name: "{{ item }}"
+      state: "{{ iptables_pkg_state }}"
+      update_cache: no
+    with_items:
+      - "{{ iptables_packages }}"
+    when: ansible_os_family == 'Debian'
+  
+  - name: IPTables | Install iptables packages (YUM)
+    become: yes
+    yum:
+      name: "{{ item }}"
+      state: "{{ iptables_pkg_state }}"
+    with_items:
+      - "{{ iptables_packages }}"
+    when: ansible_os_family == 'RedHat'
+
+  when: (iptables_pkg_install is defined and iptables_pkg_install and
+         iptables_packages is defined and iptables_packages and
+         iptables_pkg_state is defined and iptables_pkg_state)
