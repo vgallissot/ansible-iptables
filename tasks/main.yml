@@ -2,25 +2,10 @@
 # tasks file for iptables
 
 - name: Include distribution specific variables
-  include_vars: "{{ ansible_distribution }}.yml"
-  tags:
-    - iptables
-
-- name: Include release specific variables
-  include_vars: "{{ ansible_distribution_release }}.yml"
-  when: ansible_distribution == "Ubuntu"
-  tags:
-    - iptables
-
-- include: CentOS.yml
-  when: ansible_distribution == "CentOS"
-  tags:
-    - iptables
-
-- include: Ubuntu.yml
-  when: ansible_distribution == "Ubuntu"
-  tags:
-    - iptables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_os_family }}.yml"
 
 - name: Create iptables configuration
   become: yes
@@ -30,6 +15,7 @@
     owner: root
     group: root
     mode: 0600
+    backup: "{{ iptables_config_backup }}"
   register: config_result
   notify:
     - restart iptables
@@ -44,6 +30,7 @@
     owner: root
     group: root
     mode: 0600
+    backup: "{{ iptables_config_backup }}"
   register: config_result
   notify:
     - restart iptables
@@ -56,8 +43,6 @@
     name: "{{ iptables_service_name }}"
     state: started
     enabled: yes
-  async: 20
-  poll: 0
   changed_when: False
   tags:
     - iptables

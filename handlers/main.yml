@@ -6,8 +6,6 @@
   service:
     name: "{{ iptables_service_name }}"
     state: restarted
-  async: 20
-  poll: 0
   changed_when: config_result|changed
   tags:
     - iptables

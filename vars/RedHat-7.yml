@@ -1,0 +1,9 @@
+---
+# vars file for iptables (RedHat 7 OS family specific)
+
+iptables_packages:
+  - iptables
+  - iptables-services
+iptables_service_name: iptables
+iptables_configuration: /etc/sysconfig/iptables
+iptables6_configuration: /etc/sysconfig/ip6tables

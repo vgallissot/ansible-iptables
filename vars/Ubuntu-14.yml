@@ -6,3 +6,4 @@ iptables_packages:
   - iptables-persistent
 iptables_configuration: /etc/iptables/rules.v4
 iptables6_configuration: /etc/iptables/rules.v6
+iptables_service_name: iptables-persistent 

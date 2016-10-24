@@ -4,6 +4,7 @@
 iptables_pkg_install: yes
 iptables_pkg_state: present
 
+iptables_config_backup: yes
 
 # Default values for rules
 iptables_rules_default_table: filter
