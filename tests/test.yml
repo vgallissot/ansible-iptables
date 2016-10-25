@@ -1,5 +1,60 @@
 ---
 - hosts: localhost
   remote_user: root
+
+  vars:
+     iptables_rules:
+       - name: '001 Accept related established rules'
+         extras: '-m state --state RELATED,ESTABLISHED'
+         target: accept
+       - name: '000 Accept all to lo interface'
+         in_iface: lo
+         target: accept
+       - name: '002 Accept icmp destination-unreachable'
+         protocol: icmp
+         extras: '-m icmp --icmp-type 3'
+         target: accept
+       - name: '003 Accept icmp time-exceeded'
+         protocol: icmp
+         extras: '-m icmp --icmp-type 11'
+         target: accept
+       - name: '004 Accept icmp echo-reply'
+         protocol: icmp
+         extras: '-m icmp --icmp-type 0'
+         target: accept
+       - name: '005 Accept icmp echo-request'
+         protocol: icmp
+         extras: -m icmp --icmp-type 8
+         target: accept
+       - name: '100 notrack V4 HTTP(s) on prerouting eth0'
+         in_iface: eth0
+         table: raw
+         chain: prerouting
+         protocol: tcp
+         dports: 80,443
+         target: notrack
+       - name: '101 notrack V4 HTTP(s) on output eth0'
+         out_iface: eth0
+         table: raw
+         chain: output
+         protocol: tcp
+         sports: 80,443
+         target: notrack
+       - name: '200 Accept V4 HTTP(s) from World'
+         protocol: tcp
+         dports: 80,443
+         target: accept
+
+     iptables_tables:
+       filter:
+         - { chain: input, policy: drop }
+         - { chain: forward, policy: accept }
+         - { chain: output, policy: accept }
+       raw:
+         - { chain: prerouting, policy: accept }
+         - { chain: output, policy: accept }
+
+#  FAIL if no according chain/table defined
+
   roles:
     - ansible-iptables

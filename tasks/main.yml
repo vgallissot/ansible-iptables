@@ -11,12 +11,12 @@
     - 'role::iptables'
     - 'role::iptables::packages'
 
-- include: services.yml
-  tags:
-    - 'role::iptables'
-    - 'role::iptables::services'
-
 - include: configs.yml
   tags:
     - 'role::iptables'
     - 'role::iptables::configs'
+
+- include: services.yml
+  tags:
+    - 'role::iptables'
+    - 'role::iptables::services'
