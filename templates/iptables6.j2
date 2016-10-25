@@ -1,19 +1,62 @@
-#jinja2:trim_blocks: False
+#jinja2:lstrip_blocks: True
 # {{ ansible_managed }}
+{#
+ Only one rule with all variables with if everywhere
+-#}
 
-*filter
-:INPUT {{ iptables6_filter_input_policy|upper }} [0:0]
-:FORWARD {{ iptables6_filter_forward_policy|upper }} [0:0]
-:OUTPUT {{ iptables6_filter_output_policy|upper }} [0:0]
+{% if iptables_tables is defined %}
+  {% if iptables_tables is mapping -%}
 
-COMMIT
+    {# Process rules table by table -#}
+    {%- for table, chains in iptables_tables.iteritems() -%}
 
-*nat
-:PREROUTING {{ iptables6_nat_prerouting_policy|upper }} [0:0]
-{%- if ansible_distribution|lower != 'centos' %}
-:INPUT {{ iptables6_nat_input_policy|upper }} [0:0]
-{%- endif %}
-:OUTPUT {{ iptables6_nat_output_policy|upper }} [0:0]
-:POSTROUTING {{ iptables6_nat_postrouting_policy|upper }} [0:0]
+      {# First precise table name -#}
+      *{{ table | lower }}
+      {# Source: https://git.netfilter.org/iptables/tree/iptables/iptables-save.c#n78 -#}
 
-COMMIT
+      {# Second put policies for all chains of current table -#}
+      {%- for c in chains -%}
+        {# chains format : https://git.netfilter.org/iptables/tree/iptables/iptables-save.c#n117
+        We don't keep packets bytes because it would be hard to retrieve and not accurate -#}
+
+        :{{ c.chain | upper }} {{ c.policy | default(iptables_default_policy) | upper }} [0:0]
+      {% endfor -%}
+
+      {# Then add rules for that table #}
+      {% if iptables_rules is defined %}
+        {% if iptables_rules is iterable -%}
+
+          {# Sort rules to keep defined order in name. Name is mandatory #}
+          {% for rule in iptables_rules|sort(attribute='name') %}
+
+            {#- we only deal with IPv6 in this template #}
+            {% if rule.provider|default(iptables_rules_default_provider) == 'ip6tables' %}
+              {# add rules according to current table #}
+              {%- if rule.table|default(iptables_rules_default_table) == table -%}
+
+                -A {{ rule.chain|default(iptables_rules_default_chain)|upper }}
+                {%- if rule.in_iface is defined %} -i {{ rule.in_iface }} {% endif -%}
+                {%- if rule.out_iface is defined %} -o {{ rule.out_iface }} {% endif -%}
+                {%- if rule.source is defined %} -s {{ rule.source }} {% endif -%}
+                {%- if rule.protocol is defined %} -p {{ rule.protocol|lower }} {% endif -%}
+                {%- if rule.dports is defined %} -m multiport --dports {{ rule.dports }} {% endif -%}
+                {%- if rule.sports is defined %} -m multiport --sports {{ rule.sports }} {% endif -%}
+                {%- if rule.extras is defined %} {{ rule.extras }} {% endif %} -m comment --comment "{{ rule.name }}" -j {{ rule.target|default(iptables_rules_default_target)|upper }}
+              {% endif %}{# end if table match -#}
+
+            {% endif %}{# end if provider iptables -#}
+
+          {% endfor %}{# end for rules -#}
+
+        {% endif %}{# end if rules mapping -#}
+
+      {% endif %}{# end if rules defined -#}
+
+      COMMIT
+    {% endfor %}{# end for tables #}
+  {% endif %}{# end if iptables_tables is not null -#}
+
+{% endif %}{# end if iptables_tables exists -#}
+
+{# vim:ft=jinja:
+#}
