@@ -1,11 +1,5 @@
 ---
 
-- name: debug it out
-  debug: var=iptables_tables
-
-- name: debug it out
-  debug: var=iptables_rules
-
 - name: IPTables | Create iptables configuration
   become: yes
   template:
@@ -18,8 +12,6 @@
   register: config_result
   notify:
     - restart iptables
-  tags:
-    - iptables
 
 - name: IPTables | Create ip6tables configuration
   become: yes
@@ -33,5 +25,3 @@
   register: config_result
   notify:
     - restart iptables
-  tags:
-    - iptables

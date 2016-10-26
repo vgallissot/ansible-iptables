@@ -10,12 +10,20 @@
     {# Process rules table by table -#}
     {%- for table, chains in iptables_tables.iteritems() -%}
 
+      {# Ugly workaround cuz jinja vars are limited to blocks #}
+      {%- if _need_commit is not defined %}
+        {%- set _need_commit = {} -%}
+      {% endif -%}
+
       {%- for c in chains -%}
-        {# Don't use IPv6 defined chains in that IPv4 template #}
+        {# Use only ipv4 in that template #}
         {%- if c.provider is not defined or c.provider == iptables_provider_ipv4 -%}
 
           {# First precise table name -#}
           {%- if loop.first -%}
+            {# Ugly workaround cuz jinja vars are limited to blocks #}
+            {%- set _tmp = _need_commit.update({table:True}) -%}
+
             {# Source: https://git.netfilter.org/iptables/tree/iptables/iptables-save.c#n78 -#}
             *{{ table | lower }}
           {% endif -%}
@@ -33,10 +41,10 @@
       {% if iptables_rules is defined %}
         {% if iptables_rules is iterable -%}
 
-          {# Sort rules to keep defined order in name. Name is mandatory #}
-          {% for rule in iptables_rules|sort(attribute='name') %}
+          {# Rules are sorted once in a upper task. #}
+          {% for rule in iptables_rules %}
 
-            {#- we only deal with IPv4 in this template #}
+            {#- we only deal with ipv4 in this template #}
             {% if rule.provider|default(iptables_rules_default_provider) == iptables_provider_ipv4 %}
               {# add rules according to current table #}
               {%- if rule.table|default(iptables_rules_default_table) == table -%}
@@ -59,7 +67,17 @@
 
       {% endif %}{# end if rules defined -#}
 
-      COMMIT
+      {%- if _need_commit is defined -%}
+        {# Ugly workaround cuz jinja vars are limited to blocks #}
+        {%- if _need_commit is mapping -%}
+          {%- if table in _need_commit.keys() -%}
+            {# Commit only if we put some policies for chains in that rule.
+               Else: means we don't want to handle this table for that provider -#}
+            COMMIT
+          {% endif -%}
+        {% endif -%}
+      {% endif -%}
+
     {% endfor %}{# end for tables #}
   {% endif %}{# end if iptables_tables is not null -#}
 

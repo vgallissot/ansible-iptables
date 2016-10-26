@@ -3,7 +3,11 @@
   remote_user: root
 
   vars:
-     iptables_rules:
+     iptables_global_rules:
+       - name: '050 Accept monitoring tools'
+         protocol: tcp
+         sports: 22,80,443
+         target: accept
        - name: '001 Accept related established rules'
          extras: '-m state --state RELATED,ESTABLISHED'
          target: accept
@@ -26,6 +30,67 @@
          protocol: icmp
          extras: -m icmp --icmp-type 8
          target: accept
+
+       - name: '001 v6 Accept related established rules'
+         extras: '-m state --state RELATED,ESTABLISHED'
+         target: accept
+         provider: ip6tables
+       - name: '000 v6 Accept all to lo interface'
+         in_iface: lo
+         target: accept
+         provider: ip6tables
+       - name: '002 v6 Accept icmp destination-unreachable'
+         protocol: ipv6-icmp
+         extras: '-m icmp6 --icmpv6-type 1'
+         target: accept
+         provider: ip6tables
+       - name: '003 v6 Accept icmp time-exceeded'
+         protocol: ipv6-icmp
+         extras: '-m icmp6 --icmpv6-type 3'
+         target: accept
+         provider: ip6tables
+       - name: '004 v6 Accept icmp echo-reply'
+         protocol: ipv6-icmp
+         extras: '-m icmp6 --icmpv6-type 129'
+         target: accept
+         provider: ip6tables
+       - name: '005 v6 Accept icmp echo-request'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 128
+         target: accept
+         provider: ip6tables
+       - name: '006 v6 Accept icmp router-solicitation'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 133
+         target: accept
+         provider: ip6tables
+       - name: '007 v6 Accept icmp router-advertisement'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 134
+         target: accept
+         provider: ip6tables
+       - name: '008 v6 Accept icmp neighbour-solicitation'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 135
+         target: accept
+         provider: ip6tables
+       - name: '009 v6 Accept icmp neighbour-advertisement'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 136
+         target: accept
+         provider: ip6tables
+       - name: '010 v6 Accept icmp too-big'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 2
+         target: accept
+         provider: ip6tables
+       - name: '011 v6 Accept icmp parameter-problem'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 4
+         target: accept
+         provider: ip6tables
+
+     iptables_rules:
        - name: '100 notrack V4 HTTP(s) on prerouting eth0'
          in_iface: eth0
          table: raw
@@ -47,14 +112,12 @@
 
      iptables_tables:
        filter:
-         - { chain: input, policy: drop }
-         - { chain: forward, policy: accept }
-         - { chain: output, policy: accept }
+         - { chain: input,       policy: drop }
+         - { chain: forward,     policy: accept }
+         - { chain: output,      policy: accept }
        raw:
-         - { chain: prerouting, policy: accept }
-         - { chain: output, policy: accept }
-
-#  FAIL if no according chain/table defined
+         - { chain: prerouting,  policy: accept, provider: iptables }
+         - { chain: output,      policy: accept, provider: iptables }
 
   roles:
     - ansible-iptables

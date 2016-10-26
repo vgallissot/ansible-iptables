@@ -1,0 +1,35 @@
+---
+
+# You should always have at least 2 chains for each table
+# See section 'Which Chains are Implemented in Each Table?':
+# https://www.digitalocean.com/community/tutorials/a-deep-dive-into-iptables-and-netfilter-architecture
+- name: IPTables | Fail on tables var problems
+  fail:
+    msg: "You must define all chains for tables you want to handle! Error when processing [{{ item.key }}]: You need to define all chains"
+  when: "iptables_tables is not defined or iptables_tables is not mapping or
+         item.value | length < 2"
+  with_dict: "{{ iptables_tables }}"
+
+
+- name: IPTables | Join global and specific rules
+  set_fact:
+    iptables_rules: "{{ iptables_global_rules + iptables_rules}}"
+
+# Sort rules by name to respect defined order
+- name: IPTables | Sort iptables rules
+  set_fact:
+    iptables_rules: "{{ iptables_rules | sort(attribute='name') }}"
+
+# In templates, a rule is added only on defined tables.
+# To avoid ghost rules and unwanted behabiors, we just fail
+# FIXME: need to check providers
+- name: IPTables | Fail on unhandled rules
+  fail:
+    msg: "Rule [{{ item.name }}] is defined but [{{ item.table|default(iptables_rules_default_table) }}] was not found in iptables_tables var!"
+  when: "item.table|default(iptables_rules_default_table) not in iptables_tables.keys()"
+  with_items: "{{ iptables_rules }}"
+
+- name: debug it out
+  debug:
+    var: item
+  with_items: "{{ iptables_rules }}"
