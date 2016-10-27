@@ -1,6 +1,10 @@
 ---
 
-# You should always have at least 2 chains for each table
+#- name: debug it out
+#  debug:
+#    var: iptables_tables
+
+#  with_items: "{{ iptables_rules }}"# You should always have at least 2 chains for each table
 # See section 'Which Chains are Implemented in Each Table?':
 # https://www.digitalocean.com/community/tutorials/a-deep-dive-into-iptables-and-netfilter-architecture
 - name: IPTables | Fail on tables var problems
@@ -31,5 +35,4 @@
 
 #- name: debug it out
 #  debug:
-#    var: item
-#  with_items: "{{ iptables_rules }}"
+#    var: iptables_rules

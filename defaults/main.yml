@@ -18,30 +18,6 @@ iptables_rules_default_provider: iptables
 
 iptables_default_policy: accept
 
-iptables_global_rules: [] #should be used in a vars/global.yml to define mandatory rules
 iptables_tables: {}
+iptables_global_rules: [] #should be used in a vars/global.yml to define mandatory rules
 iptables_rules: []
-
-
-#iptables_tables:
-#  filter:
-#    - chain: input
-#      policy: drop
-#      provider: iptables
-#    - chain: forward
-#    - chain: output
-
-#iptables_rules:
-#  - name: '000 Allow icmp time-exceeded from world'
-#    in_iface: eth0
-#    out_iface: eth0
-#    table: filter
-#    chain: input
-#    protocol: tcp
-#    source: 0.0.0.0/0
-#    dports: 22
-#    sports: 22
-#    extras: '-m icmp6 --icmpv6-type 3'
-#    target: accept
-#    provider: iptables
-
