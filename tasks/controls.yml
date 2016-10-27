@@ -29,7 +29,7 @@
   when: "item.table|default(iptables_rules_default_table) not in iptables_tables.keys()"
   with_items: "{{ iptables_rules }}"
 
-- name: debug it out
-  debug:
-    var: item
-  with_items: "{{ iptables_rules }}"
+#- name: debug it out
+#  debug:
+#    var: item
+#  with_items: "{{ iptables_rules }}"
