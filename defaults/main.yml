@@ -7,8 +7,6 @@ iptables_pkg_state: present
 iptables_service_state: started
 iptables_service_enabled: yes
 
-iptables_config_backup: yes
-
 iptables_provider_ipv4: iptables
 iptables_provider_ipv6: ip6tables
 

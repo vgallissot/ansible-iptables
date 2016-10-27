@@ -1,27 +1,69 @@
 ---
+# Backup old config
+# copy new one
+# test with iptables-restore -t < new_file
+# if test|error => move newly created file and restore backuped one
 
-- name: IPTables | Create iptables configuration
-  become: yes
-  template:
-    src: iptables.j2
-    dest: "{{ iptables_configuration }}"
-    owner: root
-    group: root
-    mode: 0600
-    backup: "{{ iptables_config_backup }}"
-  register: config_result
-  notify:
-    - restart iptables
+- block :
+  - name: IPTables | Backup iptables configuration
+    become: yes
+    command: cp "{{ iptables_configuration }}" "{{ iptables_configuration }}.back"
+    changed_when: False
+    failed_when: False
 
-- name: IPTables | Create ip6tables configuration
-  become: yes
-  template:
-    src: iptables6.j2
-    dest: "{{ iptables6_configuration }}"
-    owner: root
-    group: root
-    mode: 0600
-    backup: "{{ iptables_config_backup }}"
-  register: config_result
-  notify:
-    - restart iptables
+  - name: IPTables | Create iptables configuration
+    become: yes
+    template:
+      src: iptables.j2
+      dest: "{{ iptables_configuration }}"
+      owner: root
+      group: root
+      mode: 0600
+    register: _config_result
+
+  - name: IPTables | Check new iptables configuration
+    become: yes
+    shell: "iptables-restore --test < {{ iptables_configuration }}"
+    when: _config_result|changed
+    notify:
+      - restart iptables
+
+  rescue:
+  - name: IPTables | Move broken iptables configuration to .broken
+    command: mv "{{ iptables_configuration }}" "{{ iptables_configuration }}.broken"
+
+  - name: IPTables | Restore iptables configuration
+    command: mv "{{ iptables_configuration }}.back" "{{ iptables_configuration }}"
+
+
+- block :
+  - name: IPTables | Backup ip6tables configuration
+    become: yes
+    command: cp "{{ iptables6_configuration }}" "{{ iptables6_configuration }}.back"
+    changed_when: False
+    failed_when: False
+
+  - name: IPTables | Create ip6tables configuration
+    become: yes
+    template:
+      src: iptables6.j2
+      dest: "{{ iptables6_configuration }}"
+      owner: root
+      group: root
+      mode: 0600
+    register: _config_result
+
+  - name: IPTables | Check new ip6tables configuration
+    become: yes
+    shell: "iptables-restore --test < {{ iptables6_configuration }}"
+    when: _config_result|changed
+    notify:
+      - restart iptables
+
+  rescue:
+  - name: IPTables | Move broken ip6tables configuration to .broken
+    command: mv "{{ iptables6_configuration }}" "{{ iptables6_configuration }}.broken"
+
+  - name: IPTables | Restore ip6tables configuration
+    command: mv "{{ iptables6_configuration }}.back" "{{ iptables6_configuration }}"
+
