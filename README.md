@@ -12,8 +12,9 @@ Role Variables
 --------------
 
 Global vars:  
+
 | Name                            | Default   | Description                                                             |
-|:--------------------------------|:----------|:------------------------------------------------------------------------|
+| :------------------------------ |:--------- |:----------------------------------------------------------------------- |
 | iptables_pkg_install            | yes       | Install packages that allow iptables-restore and iptables-save commands |
 | iptables_pkg_state              | present   | State of installed package. Either absent, present or latest            |
 | iptables_service_state          | started   | Manage service state                                                    |
@@ -31,8 +32,9 @@ Global vars:
 
 
 iptables_tables possible values:  
+
 | Name                             | Required | Default                 | Example                                               | Description                                                  |
-|:---------------------------------|:---------|:------------------------|:------------------------------------------------------|:-------------------------------------------------------------|
+|:-------------------------------- |:-------- |:----------------------- |:----------------------------------------------------- |:------------------------------------------------------------ |
 | key                              | yes      |                         | {"filter": [],"raw": []}                              | Table's name                                                 |
 | chain                            | yes      |                         | {"key": [{"chain": "input"}]}                         | Chain's name. ALL chains of each defined tables must be set! |
 | policy                           | no       | iptables_default_policy | {"key": [{"chain": "chain", "policy": "accept"}]}     | Policy for that chain                                        |
@@ -40,8 +42,9 @@ iptables_tables possible values:
 
 
 iptables_rules and iptables_global_rules possible values:  
+
 | Name      | Required | Default                         | Example                                                                               | Description                                                          |
-|:----------|:---------|:--------------------------------|:--------------------------------------------------------------------------------------|:---------------------------------------------------------------------|
+|:--------- |:-------- |:------------------------------- |:------------------------------------------------------------------------------------- |:-------------------------------------------------------------------- |
 | name      | yes      |                                 | {"name": "000 Allow everything"}                                                      | Rule's name. Mandatory to ensure rules order.                        |
 | in_iface  | no       |                                 | {"name": "001 Allow lo", "in_iface": "lo"}                                            | Name of an interface via which a packet is received                  |
 | out_iface | no       |                                 | {"name": "002 Allow out lo", "out_iface": "lo", "chain": "OUTPUT"}                    | Name of an interface via which a packet is sent                      |
