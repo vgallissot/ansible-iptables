@@ -55,8 +55,8 @@ iptables_rules and iptables_global_rules possible values:
 | dports    | no       |                                 | {"name": "007 Allow all to 443", "dports": "443", "chain": "OUTPUT"}                  | Destination ports to match. Can be list of ports seperated with dots |
 | sports    | no       |                                 | {"name": "008 Allow all from 80", "dports": "80"}                                     | Source ports to match. Can be list of ports seperated with dots      |
 | extras    | no       |                                 | {"name": "009 Allow echo-req", "extras": "-m icmp --icmp-type 8", "protocol": "icmp"} | Extra iptables expressions not handled here.                         |
-| target    | yes      | iptables_rules_default_target   | {"name": "009 Deny all from 80", "dports": "80", "target": "deny"}                    | what to do if the packet matches it                                  |
-| provider  | yes      | iptables_rules_default_provider | {"name": "001 Allow lo", "in_iface": "lo", "provider": "ip6tables"}                   | Choose if current rule is either a v4 or v6 rule.                    |
+| target    | yes      | iptables_rules_default_target   | {"name": "010 Deny all from 80", "dports": "80", "target": "deny"}                    | what to do if the packet matches it                                  |
+| provider  | yes      | iptables_rules_default_provider | {"name": "011 Allow lo", "in_iface": "lo", "provider": "ip6tables"}                   | Choose if current rule is either a v4 or v6 rule.                    |
 
 
 Dependencies
@@ -67,54 +67,124 @@ None
 Example Playbook
 ----------------
 
-Install and configure iptables to allow ICMP and OpenSSH
+Install and configure iptables to allow Everything
 ```yaml
 - hosts: all
+  vars:
+    iptables_tables:
+      filter:
+        - { chain: input,       policy: accept }
+        - { chain: forward,     policy: accept }
+        - { chain: output,      policy: accept }
+
   roles:
     - ansible.iptables
 ```
 
-Install and configure iptables to disallow ICMP, allow OpenSSH and HTTP
+Install and configure iptables to allow ICMP, established rules, and lo interface for IPv4 and IPv6
 ```yaml
 - hosts: all
   vars:
-    iptables_filter_rules:
-      - chain: input
-        protocol: tcp
-        source_address: 0.0.0.0/0
-        destination_port: 22
-        comment: OpenSSH
-        target: accept
-      - chain: input
-        protocol: tcp
-        source_address: 0.0.0.0/0
-        destination_port: 80
-        comment: HTTP
-        target: accept
+    iptables_rules:
+       # V4 rules
+       - name: '001 Accept related established rules'
+         extras: '-m state --state RELATED,ESTABLISHED'
+         target: accept
+       - name: '000 Accept all to lo interface'
+         in_iface: lo
+         target: accept
+       - name: '002 Accept icmp destination-unreachable'
+         protocol: icmp
+         extras: '-m icmp --icmp-type 3'
+         target: accept
+       - name: '003 Accept icmp time-exceeded'
+         protocol: icmp
+         extras: '-m icmp --icmp-type 11'
+         target: accept
+       - name: '004 Accept icmp echo-reply'
+         protocol: icmp
+         extras: '-m icmp --icmp-type 0'
+         target: accept
+       - name: '005 Accept icmp echo-request'
+         protocol: icmp
+         extras: -m icmp --icmp-type 8
+         target: accept
+
+       # V6 rules
+       - name: '001 v6 Accept related established rules'
+         extras: '-m state --state RELATED,ESTABLISHED'
+         target: accept
+         provider: ip6tables
+       - name: '000 v6 Accept all to lo interface'
+         in_iface: lo
+         target: accept
+         provider: ip6tables
+       - name: '002 v6 Accept icmp destination-unreachable'
+         protocol: ipv6-icmp
+         extras: '-m icmp6 --icmpv6-type 1'
+         target: accept
+         provider: ip6tables
+       - name: '003 v6 Accept icmp time-exceeded'
+         protocol: ipv6-icmp
+         extras: '-m icmp6 --icmpv6-type 3'
+         target: accept
+         provider: ip6tables
+       - name: '004 v6 Accept icmp echo-reply'
+         protocol: ipv6-icmp
+         extras: '-m icmp6 --icmpv6-type 129'
+         target: accept
+         provider: ip6tables
+       - name: '005 v6 Accept icmp echo-request'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 128
+         target: accept
+         provider: ip6tables
+       - name: '006 v6 Accept icmp router-solicitation'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 133
+         target: accept
+         provider: ip6tables
+       - name: '007 v6 Accept icmp router-advertisement'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 134
+         target: accept
+         provider: ip6tables
+       - name: '008 v6 Accept icmp neighbour-solicitation'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 135
+         target: accept
+         provider: ip6tables
+       - name: '009 v6 Accept icmp neighbour-advertisement'
+         protocol: ipv6-icmp
+         extras: -m icmp6 --icmpv6-type 136
+         target: accept
+         provider: ip6tables
+       - name: '010 v6 Accept icmp too-big'
+         protocol: ipv6-icmp
+
+    iptables_tables:
+      filter:
+        - { chain: input,       policy: accept }
+        - { chain: forward,     policy: accept }
+        - { chain: output,      policy: accept }
+
   roles:
-    - kbrebanov.iptables
+    - ansible.iptables
 ```
 
-Install and configure iptables with a port forward rule for HTTP
+Install and configure iptables with IPv6 all Open in input and IPv4 all drop in input
 ```yaml
 - hosts: all
   vars:
-    iptables_filter_rules:
-      - chain: input
-        protocol: tcp
-        source_address: 0.0.0.0/0
-        destination_port: 80
-        comment: HTTP
-        target: accept
-    iptables_nat_rules:
-      - chain: prerouting
-        protocol: tcp
-        destination_port: 80
-        target: dnat
-        to_destination: 192.168.1.54
-        to_port: 8080
+     iptables_tables:
+       filter:
+         - { chain: input,       policy: drop,    provider: iptables  }
+         - { chain: input,       policy: accept,  provider: ip6tables }
+         - { chain: forward,     policy: accept }
+         - { chain: output,      policy: accept }
+
   roles:
-    - kbrebanov.iptables
+    - ansible.iptables
 ```
 
 License
@@ -125,4 +195,4 @@ BSD
 Author Information
 ------------------
 
-Kevin Brebanov
+Vincent Gallissot from original forked repo by Kevin Brebanov
