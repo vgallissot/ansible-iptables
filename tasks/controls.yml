@@ -26,11 +26,20 @@
 
 # In templates, a rule is added only on defined tables.
 # To avoid ghost rules and unwanted behabiors, we just fail
-# FIXME: need to check providers
 - name: IPTables | Fail on unhandled rules
   fail:
     msg: "Rule [{{ item.name }}] is defined but [{{ item.table|default(iptables_rules_default_table) }}] was not found in iptables_tables var!"
   when: "item.table|default(iptables_rules_default_table) not in iptables_tables.keys()"
+  with_items: "{{ iptables_rules }}"
+
+# Condition is true when we specified a provider for rule's chain in iptables_tables and rule's provider doesn't match specified provider for tha chain
+# AKA: rule will never match a chain in that table for the specified provider
+# And we surely don't want ghost rules
+- name: IPTables | Fail on unhandled rules with specified providers
+  fail:
+    msg: "Rule [{{ item.name }}] is defined for provider [{{ item.provider|default(iptables_rules_default_provider) }}] but this provider has no [{{ item.chain|default(iptables_rules_default_chain) }}] chain defined!"
+  when: iptables_tables[item.table|default(iptables_rules_default_table)] | selectattr("provider", "defined") | join(',') != '' and
+        item.provider|default(iptables_rules_default_provider) not in iptables_tables[item.table|default(iptables_rules_default_table)] | selectattr("chain", "equalto", "{{ item.chain|default(iptables_rules_default_chain) }}") | map(attribute='provider') | list
   with_items: "{{ iptables_rules }}"
 
 #- name: debug it out
