@@ -11,7 +11,7 @@ This role requires Ansible 2.0 or higher.
 Role Variables
 --------------
 
-Global vars:  
+### Global vars:  
 
 | Name                            | Default   | Description                                                             |
 | :------------------------------ |:--------- |:----------------------------------------------------------------------- |
@@ -31,7 +31,7 @@ Global vars:
 | iptables_global_rules           | []        | List of rules merged with iptables_rules. See examples                  |
 
 
-iptables_tables possible values:  
+### iptables_tables possible values:  
 
 | Name                             | Required | Default                 | Example                                               | Description                                                  |
 |:-------------------------------- |:-------- |:----------------------- |:----------------------------------------------------- |:------------------------------------------------------------ |
@@ -41,7 +41,7 @@ iptables_tables possible values:
 | provider                         | no       | ALL providers           | {"key": [{"chain": "chain", "provider": "iptables"}]} | If set, limits current chain config to defined provider      |
 
 
-iptables_rules and iptables_global_rules possible values:  
+### iptables_rules and iptables_global_rules possible values:  
 
 | Name      | Required | Default                         | Example                                                                               | Description                                                          |
 |:--------- |:-------- |:------------------------------- |:------------------------------------------------------------------------------------- |:-------------------------------------------------------------------- |
@@ -67,7 +67,7 @@ None
 Example Playbook
 ----------------
 
-Install and configure iptables to allow Everything
+### Install and configure iptables to allow Everything
 ```yaml
 - hosts: all
   vars:
@@ -81,7 +81,7 @@ Install and configure iptables to allow Everything
     - ansible.iptables
 ```
 
-Install and configure iptables to allow ICMP, established rules, and lo interface for IPv4 and IPv6
+### Install and configure iptables to allow ICMP, established rules, and lo interface for IPv4 and IPv6
 ```yaml
 - hosts: all
   vars:
@@ -172,7 +172,7 @@ Install and configure iptables to allow ICMP, established rules, and lo interfac
     - ansible.iptables
 ```
 
-Install and configure iptables to allow all input IPv6 traffic and drop all input v4 traffic
+### Install and configure iptables to allow all input IPv6 traffic and drop all input v4 traffic
 ```yaml
 - hosts: all
   vars:
