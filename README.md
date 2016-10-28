@@ -164,7 +164,7 @@ Install and configure iptables to allow ICMP, established rules, and lo interfac
 
     iptables_tables:
       filter:
-        - { chain: input,       policy: accept }
+        - { chain: input,       policy: drop }
         - { chain: forward,     policy: accept }
         - { chain: output,      policy: accept }
 
@@ -172,7 +172,7 @@ Install and configure iptables to allow ICMP, established rules, and lo interfac
     - ansible.iptables
 ```
 
-Install and configure iptables with IPv6 all Open in input and IPv4 all drop in input
+Install and configure iptables to allow all input IPv6 traffic and drop all input v4 traffic
 ```yaml
 - hosts: all
   vars:
