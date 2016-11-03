@@ -1,11 +1,11 @@
 ---
-# Backup old config
+# Backup old config file
 # copy new one
 # test with iptables-restore -t < new_file
 # if test|error => move newly created file and restore backuped one
 
 - block :
-  - name: IPTables | Backup iptables configuration
+  - name: IPTables | Backup iptables configuration file
     become: yes
     command: cp "{{ iptables_configuration }}" "{{ iptables_configuration }}.back"
     changed_when: False
@@ -37,7 +37,7 @@
 
 
 - block :
-  - name: IPTables | Backup ip6tables configuration
+  - name: IPTables | Backup ip6tables configuration file
     become: yes
     command: cp "{{ iptables6_configuration }}" "{{ iptables6_configuration }}.back"
     changed_when: False
