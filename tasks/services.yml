@@ -1,8 +1,7 @@
 ---
 
-- name: IPTables | Start iptables service
+- name: IPTables | Check iptables service
   become: yes
   service:
     name: "{{ iptables_service_name }}"
-    state: "{{ iptables_service_state }}"
     enabled: "{{ iptables_service_enabled }}"

@@ -4,7 +4,6 @@
 iptables_pkg_install: yes
 iptables_pkg_state: present
 
-iptables_service_state: started
 iptables_service_enabled: yes
 
 iptables_provider_ipv4: iptables

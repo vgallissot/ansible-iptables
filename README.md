@@ -17,8 +17,7 @@ Role Variables
 | :------------------------------ |:--------- |:----------------------------------------------------------------------- |
 | iptables_pkg_install            | yes       | Install packages that allow iptables-restore and iptables-save commands |
 | iptables_pkg_state              | present   | State of installed package. Either absent, present or latest            |
-| iptables_service_state          | started   | Manage service state                                                    |
-| iptables_service_enabled        | yes       | Start service or not                                                    |
+| iptables_service_enabled        | yes       | Start service at boot or not                                            |
 | iptables_provider_ipv4          | iptables  | Name used in templates/vars to identify IPv4 specific rules             |
 | iptables_provider_ipv6          | ip6tables | Name used in templates/vars to identify IPv6 specific rules             |
 | iptables_rules_default_table    | filter    | Default table to use in rules definition                                |
