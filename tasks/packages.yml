@@ -10,7 +10,7 @@
     with_items:
       - "{{ iptables_packages }}"
     when: ansible_os_family == 'Debian'
-  
+
   - name: IPTables | Install iptables packages (YUM)
     become: yes
     yum:

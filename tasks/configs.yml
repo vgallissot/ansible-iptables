@@ -55,7 +55,7 @@
 
   - name: IPTables | Check new ip6tables configuration
     become: yes
-    shell: "iptables-restore --test < {{ iptables6_configuration }}"
+    shell: "ip6tables-restore --test < {{ iptables6_configuration }}"
     when: _config_result|changed
     notify:
       - restart iptables

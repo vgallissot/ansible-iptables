@@ -11,18 +11,17 @@
     {%- for table, chains in iptables_tables.iteritems() -%}
 
       {# Ugly workaround cuz jinja vars are limited to blocks #}
-      {%- if _need_commit is not defined %}
-        {%- set _need_commit = {} -%}
+      {%- if _handled_tables is not defined %}
+        {%- set _handled_tables = {} -%}
       {% endif -%}
 
       {%- for c in chains -%}
         {# Use only ipv4 in that template #}
         {%- if c.provider is not defined or c.provider == iptables_provider_ipv4 -%}
 
-          {# First precise table name -#}
-          {%- if loop.first -%}
-            {# Ugly workaround cuz jinja vars are limited to blocks #}
-            {%- set _tmp = _need_commit.update({table:True}) -%}
+          {# register handled tables and then precise table name in file -#}
+          {%- if table not in _handled_tables.keys() -%}
+            {%- set _tmp = _handled_tables.update({table:True}) -%}
 
             {# Source: https://git.netfilter.org/iptables/tree/iptables/iptables-save.c#n78 -#}
             *{{ table | lower }}
@@ -67,10 +66,9 @@
 
       {% endif %}{# end if rules defined -#}
 
-      {%- if _need_commit is defined -%}
-        {# Ugly workaround cuz jinja vars are limited to blocks #}
-        {%- if _need_commit is mapping -%}
-          {%- if table in _need_commit.keys() -%}
+      {%- if _handled_tables is defined -%}
+        {%- if _handled_tables is mapping -%}
+          {%- if table in _handled_tables.keys() -%}
             {# Commit only if we put some policies for chains in that rule.
                Else: means we don't want to handle this table for that provider -#}
             COMMIT
