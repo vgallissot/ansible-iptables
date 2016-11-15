@@ -117,7 +117,6 @@
          - { chain: output,      policy: accept }
        raw:
          - { chain: prerouting,  policy: accept, provider: iptables }
-         - { chain: prerouting,  policy: drop, provider: ip6tables }
          - { chain: output,      policy: accept, provider: iptables }
 
   roles:
